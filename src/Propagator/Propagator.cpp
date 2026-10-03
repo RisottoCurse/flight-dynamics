@@ -1,4 +1,5 @@
 #include "Propagator/Propagator.h"
+#include "State/State.h"
 #include <algorithm>
 
 Propagator::Propagator(const TwoBodyDynamics& dynamics, double stepSize):
@@ -46,17 +47,19 @@ auto Propagator::rk4Step(const StateVector& state, double dt) const -> StateVect
     return StateVector(position, velocity);
 };
 
-auto Propagator::propagate(const StateVector& initialState, double duration) const -> StateVector {
+auto Propagator::propagate(const StateVector& initialState, double duration) const -> std::vector<StateVector> {
 
+    std::vector<StateVector> trajectory;
     StateVector state = initialState;
-
     double elapsedTime{0.0};
 
     while (elapsedTime < duration) {
         const double dt = std::min(mStepSize,duration - elapsedTime);
         state = rk4Step(state, dt);
         elapsedTime += dt; 
+        trajectory.push_back(state);
+
     }
 
-    return state;
+    return trajectory;
 };

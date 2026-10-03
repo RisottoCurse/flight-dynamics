@@ -1,5 +1,5 @@
+#include <fstream>
 #include <iostream>
-
 
 #include "Eigen/Core"
 #include "State/State.h"
@@ -9,8 +9,8 @@
 
 int main()
 {
-    constexpr double MU_EARTH = 3.986004418e14;
-    constexpr double EARTH_RADIUS = 6378.137e3;
+    constexpr double MU_EARTH = 3.986004418e14; // m^3/s^2
+    constexpr double EARTH_RADIUS = 6378.137e3; // m
 
     const double altitude = 1200e3; // 1200 km for LEO
     const double radius = EARTH_RADIUS + altitude;
@@ -27,17 +27,29 @@ int main()
 
     Propagator propagator(dynamics, 1); // 1 second timestep
 
-    const double duration = 5400.0; // 90 minutes
+    const double duration = 6564.81; // T = 2 * pi sqrt(r^3/GM) 
 
-    StateVector finalState = propagator.propagate(initialState, duration);
+    std::vector<StateVector> trajectory = propagator.propagate(initialState, duration);
 
-    std::cout << "Final position: "
-              << finalState.getPosition()
-              << "\n\n";
+    std::ofstream output("notebook/orbit_trajectory.csv");
 
-    std::cout << "Final velocity: "
-              << finalState.getVelocity()
-              << "\n";
+    output << "time,x,y,z,u,v,w\n";
+
+    double time{0};
+
+    for (const StateVector& state : trajectory) {
+        output << std::setprecision(15)
+           << time << ","
+           << state.getPosition().x() << ","
+           << state.getPosition().y() << ","
+           << state.getPosition().z() << ","
+           << state.getVelocity().x() << ","
+           << state.getVelocity().y() << ","
+           << state.getPosition().z() << "\n";
+        time += 1;
+    }
+
+    output.close();
 
     return 0;
 }

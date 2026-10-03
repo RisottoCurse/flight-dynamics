@@ -14,6 +14,6 @@ public:
 
     Propagator(const TwoBodyDynamics& dynamics, double stepSize);
 
-    StateVector propagate(const StateVector& initialState, double duration) const;
+    std::vector<StateVector> propagate(const StateVector& initialState, double duration) const;
 
 };
