@@ -13,7 +13,9 @@ class Propagator {
 public: 
 
     Propagator(const TwoBodyDynamics& dynamics, double stepSize);
-
     std::vector<StateVector> propagate(const StateVector& initialState, double duration) const;
+
+    // getters
+    [[nodiscard]] auto getStepSize() const -> const double { return mStepSize; }
 
 };

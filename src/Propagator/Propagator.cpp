@@ -52,6 +52,7 @@ auto Propagator::propagate(const StateVector& initialState, double duration) con
     std::vector<StateVector> trajectory;
     StateVector state = initialState;
     double elapsedTime{0.0};
+    trajectory.push_back(state);
 
     while (elapsedTime < duration) {
         const double dt = std::min(mStepSize,duration - elapsedTime);

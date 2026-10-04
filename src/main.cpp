@@ -12,8 +12,8 @@ int main()
     constexpr double MU_EARTH = 3.986004418e14; // m^3/s^2
     constexpr double EARTH_RADIUS = 6378.137e3; // m
 
-    const double altitude = 1200e3; // 1200 km for LEO
-    const double radius = EARTH_RADIUS + altitude;
+    const double altitude = 1200e3; // m (1200 km for LEO)
+    const double radius = EARTH_RADIUS + altitude; // m
 
     Eigen::Vector3d position(radius, 0.0, 0.0);
 
@@ -32,6 +32,11 @@ int main()
     std::vector<StateVector> trajectory = propagator.propagate(initialState, duration);
 
     std::ofstream output("notebook/orbit_trajectory.csv");
+    
+    if (!output) {
+        std::cerr << "Failed to open orbit_trajectory.csv\n";
+        return 1;
+}
 
     output << "time,x,y,z,u,v,w\n";
 
@@ -46,7 +51,7 @@ int main()
            << state.getVelocity().x() << ","
            << state.getVelocity().y() << ","
            << state.getPosition().z() << "\n";
-        time += 1;
+        time += propagator.getStepSize();
     }
 
     output.close();
