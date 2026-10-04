@@ -1,8 +1,9 @@
 #include "Propagator/Propagator.h"
+#include "Dynamics/OrbitalDynamics.h"
 #include "State/State.h"
 #include <algorithm>
 
-Propagator::Propagator(const TwoBodyDynamics& dynamics, double stepSize):
+Propagator::Propagator(const OrbitalDynamics& dynamics, double stepSize):
     mDynamics(dynamics),
     mStepSize(stepSize) {}
 

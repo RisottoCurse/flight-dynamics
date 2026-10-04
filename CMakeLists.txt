@@ -28,7 +28,8 @@ target_link_libraries(flight_dynamics
 # Main executable
 add_executable(main
     src/main.cpp
-    src/Dynamics/TwoBodyDynamics.cpp
+    src/Dynamics/OrbitalDynamics.cpp
+    src/Dynamics/J2Perturbation.cpp
     src/Propagator/Propagator.cpp
 )
 

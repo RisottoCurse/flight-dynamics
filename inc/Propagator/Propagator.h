@@ -1,18 +1,18 @@
 #pragma once
 
 #include "State/State.h"
-#include "Dynamics/TwoBodyDynamics.h"
+#include "Dynamics/OrbitalDynamics.h"
 
 class Propagator {
 
     StateVector rk4Step(const StateVector& state, double dt) const;
 
-    const TwoBodyDynamics& mDynamics;
+    const OrbitalDynamics& mDynamics;
     double mStepSize;
 
 public: 
 
-    Propagator(const TwoBodyDynamics& dynamics, double stepSize);
+    Propagator(const OrbitalDynamics& dynamics, double stepSize);
     std::vector<StateVector> propagate(const StateVector& initialState, double duration) const;
 
     // getters

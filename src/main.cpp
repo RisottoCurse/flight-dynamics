@@ -3,9 +3,11 @@
 
 #include "Eigen/Core"
 #include "State/State.h"
-#include "Dynamics/TwoBodyDynamics.h"
+#include "Dynamics/OrbitalDynamics.h"
 #include "Propagator/Propagator.h"
 
+int TwoBodyDynamics(double mu, StateVector& initial);
+int J2Dynamics(const double mu, StateVector& initial);
 
 int main()
 {
@@ -23,15 +25,24 @@ int main()
 
     StateVector initialState(position, velocity);
 
-    TwoBodyDynamics dynamics(MU_EARTH);
+    int twoBody = TwoBodyDynamics(MU_EARTH, initialState);
+    int j2dynam = J2Dynamics(MU_EARTH, initialState);
 
-    Propagator propagator(dynamics, 1); // 1 second timestep
+    return 0;
+}
+
+
+int TwoBodyDynamics(const double mu, StateVector& initial) {
+
+    OrbitalDynamics twoBody(mu);
+
+    Propagator propagator(twoBody, 1); // 1 second timestep
 
     const double duration = 6564.81; // T = 2 * pi sqrt(r^3/GM) 
 
-    std::vector<StateVector> trajectory = propagator.propagate(initialState, duration);
+    std::vector<StateVector> trajectory = propagator.propagate(initial, duration);
 
-    std::ofstream output("notebook/orbit_trajectory.csv");
+    std::ofstream output("notebook/2BodyTests/orbit_trajectory.csv");
     
     if (!output) {
         std::cerr << "Failed to open orbit_trajectory.csv\n";
@@ -57,4 +68,48 @@ int main()
     output.close();
 
     return 0;
+
+}
+
+
+int J2Dynamics(const double mu, StateVector& initial) {
+
+    OrbitalDynamics j2Dynamics(mu);
+
+    j2Dynamics.enableJ2(true);
+
+
+    Propagator propagator(j2Dynamics, 1); // 1 second timestep
+
+    const double duration = 6564.81; // T = 2 * pi sqrt(r^3/GM) 
+
+    std::vector<StateVector> trajectory = propagator.propagate(initial, duration);
+
+    std::ofstream output("notebook/2BodyTests/orbit_trajectory.csv");
+    
+    if (!output) {
+        std::cerr << "Failed to open orbit_trajectory.csv\n";
+        return 1;
+}
+
+    output << "time,x,y,z,u,v,w\n";
+
+    double time{0};
+
+    for (const StateVector& state : trajectory) {
+        output << std::setprecision(15)
+           << time << ","
+           << state.getPosition().x() << ","
+           << state.getPosition().y() << ","
+           << state.getPosition().z() << ","
+           << state.getVelocity().x() << ","
+           << state.getVelocity().y() << ","
+           << state.getPosition().z() << "\n";
+        time += propagator.getStepSize();
+    }
+
+    output.close();
+
+    return 0;
+
 }
