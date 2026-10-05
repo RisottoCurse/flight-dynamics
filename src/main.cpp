@@ -34,7 +34,7 @@ int main()
 
 int TwoBodyDynamics(const double mu, StateVector& initial) {
 
-    OrbitalDynamics twoBody(mu);
+    OrbitalDynamics twoBody;
 
     Propagator propagator(twoBody, 1); // 1 second timestep
 
@@ -45,9 +45,9 @@ int TwoBodyDynamics(const double mu, StateVector& initial) {
     std::ofstream output("notebook/2BodyTests/orbit_trajectory.csv");
     
     if (!output) {
-        std::cerr << "Failed to open orbit_trajectory.csv\n";
+        std::cerr << "Failed to open 2-body orbit_trajectory.csv\n";
         return 1;
-}
+    }
 
     output << "time,x,y,z,u,v,w\n";
 
@@ -74,10 +74,9 @@ int TwoBodyDynamics(const double mu, StateVector& initial) {
 
 int J2Dynamics(const double mu, StateVector& initial) {
 
-    OrbitalDynamics j2Dynamics(mu);
+    OrbitalDynamics j2Dynamics;
 
     j2Dynamics.enableJ2(true);
-
 
     Propagator propagator(j2Dynamics, 1); // 1 second timestep
 
@@ -85,12 +84,12 @@ int J2Dynamics(const double mu, StateVector& initial) {
 
     std::vector<StateVector> trajectory = propagator.propagate(initial, duration);
 
-    std::ofstream output("notebook/2BodyTests/orbit_trajectory.csv");
+    std::ofstream output("notebook/J2Tests/j2_orbit_trajectory.csv");
     
     if (!output) {
-        std::cerr << "Failed to open orbit_trajectory.csv\n";
+        std::cerr << "Failed to open j2 orbit_trajectory.csv\n";
         return 1;
-}
+    }
 
     output << "time,x,y,z,u,v,w\n";
 
