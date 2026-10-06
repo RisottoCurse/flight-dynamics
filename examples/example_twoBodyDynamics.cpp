@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "Common/Constants.h"
 #include "Eigen/Core"
 #include "State/State.h"
 #include "Dynamics/OrbitalDynamics.h"
@@ -10,21 +11,24 @@ int TwoBodyDynamics(double mu, StateVector& initial);
 
 int main()
 {
-    constexpr double MU_EARTH = 3.986004418e14; // m^3/s^2
-    constexpr double EARTH_RADIUS = 6378.137e3; // m
+    const double radius = EarthConstants::RADIUS + EarthConstants::LEOAltitude; // m
 
-    const double altitude = 1200e3; // m (1200 km for LEO)
-    const double radius = EARTH_RADIUS + altitude; // m
+    // Keplerian Elements for Circular Orbit
+    const constexpr double a{7000e3}; // 7000 km
+    const constexpr double inclination{60.0 * (MathsConstants::pi / 180)}; // converting 60 degrees to radians
+    
+    const double velocityMagnitude = std::sqrt(EarthConstants::MU / a);  // sqrt (GM/r)
 
-    Eigen::Vector3d position(radius, 0.0, 0.0);
+    Eigen::Vector3d position(a, 0.0, 0.0);
 
-    const double circularVelocity = std::sqrt(MU_EARTH / radius);
-
-    Eigen::Vector3d velocity(0.0, circularVelocity, 0.0);
+    Eigen::Vector3d velocity(0.0, 
+                            velocityMagnitude * std::cos(inclination), 
+                            velocityMagnitude * std::sin(inclination)
+                        );
 
     StateVector initialState(position, velocity);
 
-    int twoBody = TwoBodyDynamics(MU_EARTH, initialState);
+    int twoBody = TwoBodyDynamics(EarthConstants::MU, initialState);
 
     return 0;
 }
@@ -36,7 +40,7 @@ int TwoBodyDynamics(const double mu, StateVector& initial) {
 
     Propagator propagator(twoBody, 1); // 1 second timestep
 
-    const double duration = 6564.81; // T = 2 * pi sqrt(r^3/GM) 
+    const double duration = 86400; // 1 day
 
     std::vector<StateVector> trajectory = propagator.propagate(initial, duration);
 

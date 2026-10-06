@@ -27,6 +27,6 @@ xlabel('X [m]');
 ylabel('Y [m]');
 zlabel('Z [m]');
 
-title('Two-Body Satellite Trajectory');
+title('Two-Body Satellite Trajectory with 60 Degree Inclination');
 
 hold off;

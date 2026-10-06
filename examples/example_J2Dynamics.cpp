@@ -8,8 +8,6 @@
 #include "Propagator/Propagator.h"
 
 int J2Dynamics(const double mu, StateVector& initial);
-void J2Test1();
-void J2Test2();
 
 int main()
 {
@@ -29,8 +27,6 @@ int main()
     StateVector initialState(position, velocity);
 
     int j2dynam = J2Dynamics(EarthConstants::MU, initialState);
-    J2Test1();
-    J2Test2();
 
     return 0;
 }
@@ -43,7 +39,7 @@ int J2Dynamics(const double mu, StateVector& initial) {
 
     Propagator propagator(j2Dynamics, 1); // 1 second timestep
 
-    const double duration = 86400.0; // 1 day
+    const double duration = 86400; // 1 day
 
 
     std::vector<StateVector> trajectory = propagator.propagate(initial, duration);
@@ -76,56 +72,3 @@ int J2Dynamics(const double mu, StateVector& initial) {
     return 0;
 
 }
-
-void J2Test1() {
-
-    J2Perturbation j2(
-        EarthConstants::MU,
-        EarthConstants::RADIUS,
-        EarthConstants::J2
-    );
-    
-    const Eigen::Vector3d position(
-        7.0e6,
-        0.0,
-        0.0
-    );
-    
-    const Eigen::Vector3d acceleration =
-        j2.acceleration(position);
-    
-    std::cout << "J2 acceleration:\n"
-              << acceleration
-              << "\n";
-}
-
-void J2Test2(){
-
-    constexpr double a = 7.0e6;
-
-    constexpr double inclination = 60.0 * (MathsConstants::pi / 180.0);
-
-    const double velocityMagnitude =
-        std::sqrt(EarthConstants::MU / a);
-
-    const Eigen::Vector3d position(
-        a,
-        0.0,
-        0.0
-    );
-
-    const Eigen::Vector3d velocity(
-        0.0,
-        velocityMagnitude * std::cos(inclination),
-        velocityMagnitude * std::sin(inclination)
-    );
-
-    std::cout << "Position:\n"
-          << position
-          << "\n\n";
-
-    std::cout << "Velocity:\n"
-            << velocity
-            << "\n";
-}
-
