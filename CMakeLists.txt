@@ -79,3 +79,9 @@ list(APPEND CMAKE_MODULE_PATH
 enable_testing()
 
 add_subdirectory(tests)
+
+# --------------------------------------------------
+# Examples
+# --------------------------------------------------
+
+add_subdirectory(examples)

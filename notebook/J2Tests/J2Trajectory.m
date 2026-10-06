@@ -1,4 +1,4 @@
-data = readtable("notebook/2BodyTests/orbit_trajectory.csv");
+data = readtable("notebook/J2Tests/j2_orbit_trajectory.csv");
 
 t  = data.time;
 

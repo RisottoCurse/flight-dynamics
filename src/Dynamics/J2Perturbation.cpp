@@ -18,7 +18,7 @@ auto J2Perturbation::acceleration(const Eigen::Vector3d& position) const -> Eige
     const double r5 = r*r*r*r*r;
     const double z2 = z * z;
     
-    const double constants = (3.0 * mJ2Perturbation * mMu * mEarthRadius) / (2.0 * r5);
+    const double constants = (3.0 * mJ2Perturbation * mMu * (mEarthRadius * mEarthRadius)) / (2.0 * r5);
 
     const double xyTerm = ((5.0 * z2) / r2) - 1.0;
     const double zTerm = ((5.0 * z2) / r2) - 3.0;
