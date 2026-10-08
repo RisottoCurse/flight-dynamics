@@ -1,4 +1,4 @@
-data = readtable("notebook/orbit_trajectory.csv");
+data = readtable("notebook/J2Tests/j2_orbit_trajectory.csv");
 
 t  = data.time;
 
@@ -27,6 +27,6 @@ xlabel('X [m]');
 ylabel('Y [m]');
 zlabel('Z [m]');
 
-title('Two-Body Satellite Trajectory');
+title('J2 Satellite Trajectory with 60 Degree Inclination');
 
 hold off;

@@ -5,7 +5,7 @@ all: build
 
 # Configure CMake
 configure:
-	cmake -S . -B build
+	cmake -S . -B build -G Ninja
 
 # Build the project
 build: configure
@@ -17,7 +17,14 @@ run: build
 		echo "Usage: make run <executable>"; \
 		exit 1; \
 	fi
-	./build/$(filter-out run,$(MAKECMDGOALS))
+	@if [ -f "./build/$(filter-out run,$(MAKECMDGOALS))" ]; then \
+		./build/$(filter-out run,$(MAKECMDGOALS)); \
+	elif [ -f "./build/examples/$(filter-out run,$(MAKECMDGOALS))" ]; then \
+		./build/examples/$(filter-out run,$(MAKECMDGOALS)); \
+	else \
+		echo "Executable not found: $(filter-out run,$(MAKECMDGOALS))"; \
+		exit 1; \
+	fi
 
 
 # Run examples
