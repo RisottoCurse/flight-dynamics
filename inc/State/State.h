@@ -2,7 +2,6 @@
 
 #include <Eigen/Dense>
 
-
 class StateVector {
 
     Eigen::Vector3d mPosition;
