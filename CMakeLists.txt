@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(MyProject
+project(flight_dynamics
     VERSION 1.0
     DESCRIPTION "Flight Dynamics Project"
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
-set(CMAKE_CXX_STANDARD 20)
+# --------------------------------------------------
+# Compiler Configuration
+# --------------------------------------------------
+
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -17,15 +21,28 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(external/eigen)
 
+# --------------------------------------------------
+# Automatically Discover Source Files
+# --------------------------------------------------
+
+file(GLOB_RECURSE FLIGHT_DYNAMICS_SOURCES
+    CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+
+)
+
+# Exclude main.cpp if present
+list(FILTER FLIGHT_DYNAMICS_SOURCES
+    EXCLUDE REGEX ".*/main\\.cpp$"
+
+)
 
 # --------------------------------------------------
 # Flight Dynamics library
 # --------------------------------------------------
 
-add_library(flight_dynamics
-    src/Dynamics/OrbitalDynamics.cpp
-    src/Dynamics/J2Perturbation.cpp
-    src/Propagator/Propagator.cpp
+add_library(flight_dynamics STATIC
+    ${FLIGHT_DYNAMICS_SOURCES}
 )
 
 target_include_directories(flight_dynamics

@@ -6,27 +6,24 @@
 #include "State/State.h"
 #include "Dynamics/OrbitalDynamics.h"
 #include "Propagator/Propagator.h"
+#include "State/KeplerianElements.h"
 
 int TwoBodyDynamics(double mu, StateVector& initial);
 
 int main()
 {
-    const double radius = EarthConstants::RADIUS + EarthConstants::LEOAltitude; // m
+    constexpr double degToRad = MathsConstants::pi / 180.0;
 
-    // Keplerian Elements for Circular Orbit
-    const constexpr double a{7000e3}; // 7000 km
-    const constexpr double inclination{60.0 * (MathsConstants::pi / 180)}; // converting 60 degrees to radians
-    
-    const double velocityMagnitude = std::sqrt(EarthConstants::MU / a);  // sqrt (GM/r)
+    KeplerianElements orbit(
+        7000e3,
+        0.0,
+        60.0 * degToRad,
+        0.0,
+        0.0,
+        0.0   
+    );
 
-    Eigen::Vector3d position(a, 0.0, 0.0);
-
-    Eigen::Vector3d velocity(0.0, 
-                            velocityMagnitude * std::cos(inclination), 
-                            velocityMagnitude * std::sin(inclination)
-                        );
-
-    StateVector initialState(position, velocity);
+    StateVector initialState = orbit.toCartesian();
 
     int twoBody = TwoBodyDynamics(EarthConstants::MU, initialState);
 

@@ -2,6 +2,7 @@ add_executable(unit_tests
     test_state.cpp
     test_dynamics.cpp
     test_propagator.cpp
+    test_keplerian.cpp
 )
 
 target_link_libraries(unit_tests
