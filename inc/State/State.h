@@ -1,19 +1,20 @@
 #pragma once 
 
-#include <Eigen/Dense>
+
+#include "Common/maths.h"
 
 class StateVector {
 
-    Eigen::Vector3d mPosition;
-    Eigen::Vector3d mVelocity;
+    Vector3 mPosition;
+    Velocity mVelocity;
 
 public: 
-    StateVector(const Eigen::Vector3d& position, const Eigen::Vector3d& velocity) : 
+    StateVector(const Vector3& position, const Velocity& velocity) : 
     mPosition(position), mVelocity(velocity) 
     {};
 
     // getters
-    [[nodiscard]] auto getPosition() const -> const Eigen::Vector3d& { return mPosition; }
-    [[nodiscard]] auto getVelocity() const -> const Eigen::Vector3d& { return mVelocity; }
+    [[nodiscard]] auto getPosition() const -> const Vector3& { return mPosition; }
+    [[nodiscard]] auto getVelocity() const -> const Velocity& { return mVelocity; }
 
 };
