@@ -30,7 +30,6 @@ auto ImpulsiveManoeuvre::deltaVECI(const StateVector& state) const -> Vector3 {
         const Vector3 tHat = nHat.cross(rHat);
 
         // Convert RTN deltaV into ECI
-
         const Vector3 deltaV = mDeltaV.x() * rHat + mDeltaV.y() * tHat + mDeltaV.z() * nHat;
 
         return deltaV;

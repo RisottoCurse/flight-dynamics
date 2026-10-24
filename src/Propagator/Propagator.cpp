@@ -65,3 +65,7 @@ auto Propagator::propagate(const StateVector& initialState, double duration) con
 
     return trajectory;
 };
+
+auto Propagator::singlePropagate(const StateVector& initialState, double dt) const -> StateVector {
+    return rk4Step(initialState, dt);
+};
