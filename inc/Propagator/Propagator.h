@@ -13,6 +13,8 @@ class Propagator {
 public: 
 
     Propagator(const OrbitalDynamics& dynamics, double stepSize);
+
+    auto step(const StateVector& state, double dt) const -> StateVector;
     
     auto propagate(const StateVector& initialState, double duration) const -> std::vector<StateVector>;
     auto singlePropagate(const StateVector& initialState, double dt) const -> StateVector;

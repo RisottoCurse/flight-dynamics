@@ -50,6 +50,10 @@ auto Propagator::rk4Step(const StateVector& state, double dt) const -> StateVect
 
 auto Propagator::propagate(const StateVector& initialState, double duration) const -> std::vector<StateVector> {
 
+    if (duration < 0.0) {
+        throw std::invalid_argument("Duration must be non-negative");
+    }
+
     std::vector<StateVector> trajectory;
     StateVector state = initialState;
     double elapsedTime{0.0};
@@ -67,5 +71,11 @@ auto Propagator::propagate(const StateVector& initialState, double duration) con
 };
 
 auto Propagator::singlePropagate(const StateVector& initialState, double dt) const -> StateVector {
+    
+    if(dt <= 0.0) {
+        throw std::invalid_argument("Step size must be positive");
+    }
+
     return rk4Step(initialState, dt);
 };
+

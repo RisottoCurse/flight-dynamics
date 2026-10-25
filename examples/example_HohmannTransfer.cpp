@@ -1,6 +1,5 @@
 #include <iostream>
 #include <iomanip>
-#include <fstream>
 
 #include "State/State.h"
 #include "Common/maths.h"
@@ -8,7 +7,14 @@
 #include "Dynamics/OrbitalDynamics.h"
 #include "Propagator/Propagator.h"
 #include "Manoeuvre/HohmannTransfer.h"
+#include "IO/TrajectoryWriter.h"
+#include "Manoeuvre/ImpulsiveManoeuvre.h"
 
+enum class TrajectoryPhase {
+    Initial = 0,
+    Transfer = 1,
+    Final = 2
+};
 
 int main() {
 
@@ -50,72 +56,42 @@ int main() {
     OrbitalDynamics dynamics(mu);
     Propagator propagate(dynamics, dt);
 
-
     // Txt Output
-    std::ofstream file("notebook/HohmannTransfer/hohmann_transfer.csv");
-    
-    if (!file.is_open()) {
-        std::cerr << "Error opening CSV file\n";
-        return 1;
-    }
-
-    file << "time,x,y,z,u,v,w,phase\n";
-
-    auto saveState = [&](double t, const StateVector& s, int phase) {
-
-        const auto& r = s.getPosition();
-        const auto& v = s.getVelocity();
-
-        file << std::setprecision(16)
-             << t << ","
-             << r.x() << ","
-             << r.y() << ","
-             << r.z() << ","
-             << v.x() << ","
-             << v.y() << ","
-             << v.z() << ","
-             << phase << "\n";
-    };
-
-    double time{0.0};
-    saveState(time, state, 0);
+    TrajectoryWriter writer("notebook/HohmannTransfer/hohmann_transfer.csv");
+    writer.write(0.0, state, static_cast<int>(TrajectoryPhase::Initial));
 
     // First Impulse 
-    const Vector3 deltaV1 = hohmannTransferResult.deltaV1 * state.getVelocity().normalized(); // unit vector 
-    state = StateVector(state.getPosition(), state.getVelocity() + deltaV1);
-
-    saveState(time, state, 1);
+    ImpulsiveManoeuvre firstImpulse(Vector3(0.0, hohmannTransferResult.deltaV1, 0.0 ), ManoeuvreFrame::RTN);
+    state = firstImpulse.apply(state);
+    writer.write(0.0, state, static_cast<int>(TrajectoryPhase::Transfer));
 
     // Propagate the orbit
+    double time{0.0};
     while(time < hohmannTransferResult.semiOrbitalPeriod) {
 
         const double duration = std::min(propagate.getStepSize(), hohmannTransferResult.semiOrbitalPeriod - time);
         state = propagate.singlePropagate(state, duration);
         time += duration;
-        saveState(time, state, 1);
+        writer.write(time, state, static_cast<int>(TrajectoryPhase::Transfer));
 
     }
 
     // Second Impulse
-    const Vector3 deltaV2 = hohmannTransferResult.deltaV2 * state.getVelocity().normalized();
-    state = StateVector(state.getPosition(), state.getVelocity() + deltaV2);
-    
-    saveState(time, state, 1);
+    ImpulsiveManoeuvre secondImpulse(Vector3(0.0, hohmannTransferResult.deltaV2, 0.0), ManoeuvreFrame::RTN);
+    state = secondImpulse.apply(state);
+    writer.write(time, state, static_cast<int>(TrajectoryPhase::Final));
 
     // Propagate final orbit
-
     const double finalPeriod = 2.0 * MathsConstants::pi * std::sqrt((finalRadius*finalRadius*finalRadius)/mu);
     const double endTime = time + finalPeriod;
 
     while (time < endTime) {
         const double duration = std::min(dt, endTime - time);
-        Propagator stepPropagator(dynamics, duration);
-        state = stepPropagator.singlePropagate(state, duration);
+        state = propagate.singlePropagate(state, duration);
         time += duration;
-        saveState(time, state, 2);
+        writer.write(time, state, static_cast<int>(TrajectoryPhase::Final));
     }
 
-    file.close();
     std::cout << "\nTrajectory saved to hohmann_transfer.csv\n";
     return 0;
 }
