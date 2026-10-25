@@ -24,3 +24,12 @@ target_link_libraries(example_impulsiveManoeuvre
     PRIVATE
         flight_dynamics
 )
+
+add_executable(example_HohmannTransfer
+example_HohmannTransfer.cpp
+)
+
+target_link_libraries(example_HohmannTransfer
+    PRIVATE
+        flight_dynamics
+)
