@@ -19,8 +19,11 @@ enum class TrajectoryPhase {
 int main() {
 
     // Simulation Parameters
-    constexpr double initialRadius{7000e3}; // 7000km
-    constexpr double finalRadius{12000e3}; // 12000 km
+    constexpr double initialAltitude = 1200e3;
+    constexpr double targetAltitude  = 10000e3;
+
+    constexpr double initialRadius{EarthConstants::RADIUS + initialAltitude};
+    constexpr double finalRadius{EarthConstants::RADIUS + targetAltitude};
 
     constexpr double mu{EarthConstants::MU};
     constexpr double dt{1};
