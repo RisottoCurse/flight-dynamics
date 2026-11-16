@@ -172,9 +172,10 @@ tab3 = uitab(tabGroup, 'Title', 'Orbital Altitude');
 tab4 = uitab(tabGroup, 'Title', 'Keplerian Elements');
 tab5 = uitab(tabGroup, 'Title', 'Orbital Energy');
 tab6 = uitab(tabGroup, 'Title', 'Angular Momentum');
+tab7 = uitab(tabGroup, 'Title', 'Hohmann Transfer Animation');
 
 % Match the tab backgrounds to the white figure and axes backgrounds.
-set([tab1 tab2 tab3 tab4 tab5 tab6], 'BackgroundColor', 'w');
+set([tab1 tab2 tab3 tab4 tab5 tab6 tab7], 'BackgroundColor', 'w');
 
 %% ========================================
 % TAB 1: HOHMANN TRANSFER TRAJECTORY
@@ -418,9 +419,466 @@ ylabel(ax6, 'Specific angular momentum [10^9 m^2/s]');
 title(ax6, 'Specific Angular Momentum During Hohmann Transfer');
 
 %% ========================================
+% TAB 7: INTERACTIVE HOHMANN TRANSFER ANIMATION
+% ========================================
+
+% Animation axes
+ax7 = axes('Parent', tab7, ...
+    'Units', 'normalized', ...
+    'Position', [0.08 0.25 0.78 0.65]);
+
+hold(ax7, 'on');
+grid(ax7, 'on');
+axis(ax7, 'equal');
+
+% Earth
+surf(ax7, earthX, earthY, earthZ, ...
+    'FaceColor', [0.25 0.55 0.85], ...
+    'EdgeColor', 'none', ...
+    'FaceAlpha', 1, ...
+    'HandleVisibility', 'off');
+
+% Initial orbit
+plot3(ax7, ...
+    initialOrbitKm(1,:), ...
+    initialOrbitKm(2,:), ...
+    initialOrbitKm(3,:), ...
+    'b--', 'LineWidth', 1.5, ...
+    'DisplayName', 'Initial Orbit');
+
+% Transfer orbit
+plot3(ax7, ...
+    rKm(idxTransfer,1), ...
+    rKm(idxTransfer,2), ...
+    rKm(idxTransfer,3), ...
+    'r--', 'LineWidth', 1.5, ...
+    'DisplayName', 'Transfer Orbit');
+
+% Final orbit
+plot3(ax7, ...
+    rKm(idxFinal,1), ...
+    rKm(idxFinal,2), ...
+    rKm(idxFinal,3), ...
+    'g--', 'LineWidth', 1.5, ...
+    'DisplayName', 'Final Orbit');
+
+% Burn locations
+plot3(ax7, ...
+    rKm(burn1Index,1), ...
+    rKm(burn1Index,2), ...
+    rKm(burn1Index,3), ...
+    'ko', 'MarkerFaceColor', 'k', ...
+    'MarkerSize', 8, ...
+    'DisplayName', 'Burn 1');
+
+plot3(ax7, ...
+    rKm(burn2Index,1), ...
+    rKm(burn2Index,2), ...
+    rKm(burn2Index,3), ...
+    'mo', 'MarkerFaceColor', 'm', ...
+    'MarkerSize', 8, ...
+    'DisplayName', 'Burn 2');
+
+% Moving spacecraft
+satellite = plot3(ax7, ...
+    rKm(1,1), rKm(1,2), rKm(1,3), ...
+    'ro', ...
+    'MarkerFaceColor', 'r', ...
+    'MarkerSize', 10, ...
+    'DisplayName', 'Spacecraft');
+
+% Trajectory trail
+trail = plot3(ax7, NaN, NaN, NaN, ...
+    'Color', [1 0.5 0], ...
+    'LineWidth', 2, ...
+    'DisplayName', 'Trajectory Trail');
+
+% Axes
+xlim(ax7, [-plotLimit plotLimit]);
+ylim(ax7, [-plotLimit plotLimit]);
+zlim(ax7, [-plotLimit plotLimit]);
+
+xlabel(ax7, 'ECI X [km]');
+ylabel(ax7, 'ECI Y [km]');
+zlabel(ax7, 'ECI Z [km]');
+
+title(ax7, 'Hohmann Transfer Animation');
+
+view(ax7, 35, 25);
+legend(ax7, 'Location', 'bestoutside');
+
+lighting(ax7, 'gouraud');
+camlight(ax7, 'headlight');
+
+%% ========================================
+% ANIMATION CONTROL PANEL
+% ========================================
+
+controlPanel = uipanel( ...
+    'Parent', tab7, ...
+    'Units', 'normalized', ...
+    'Position', [0.02 0.02 0.96 0.16], ...
+    'BackgroundColor', 'w', ...
+    'BorderType', 'none');
+
+% Status display
+statusText = uicontrol( ...
+    'Parent', controlPanel, ...
+    'Style', 'text', ...
+    'Units', 'normalized', ...
+    'Position', [0.02 0.60 0.96 0.30], ...
+    'BackgroundColor', 'w', ...
+    'FontSize', 11, ...
+    'HorizontalAlignment', 'left', ...
+    'String', 'Time: 0 min');
+
+% Play / Pause
+playButton = uicontrol( ...
+    'Parent', controlPanel, ...
+    'Style', 'pushbutton', ...
+    'Units', 'normalized', ...
+    'Position', [0.02 0.10 0.10 0.35], ...
+    'String', 'Play');
+
+% Restart
+restartButton = uicontrol( ...
+    'Parent', controlPanel, ...
+    'Style', 'pushbutton', ...
+    'Units', 'normalized', ...
+    'Position', [0.14 0.10 0.10 0.35], ...
+    'String', 'Restart');
+
+% Timeline slider
+timelineSlider = uicontrol( ...
+    'Parent', controlPanel, ...
+    'Style', 'slider', ...
+    'Units', 'normalized', ...
+    'Position', [0.28 0.15 0.45 0.25], ...
+    'Min', 1, ...
+    'Max', numel(time), ...
+    'Value', 1);
+
+% Speed selection
+speedMenu = uicontrol( ...
+    'Parent', controlPanel, ...
+    'Style', 'popupmenu', ...
+    'Units', 'normalized', ...
+    'Position', [0.78 0.10 0.18 0.35], ...
+    'String', {'1x','5x','20x','100x'}, ...
+    'Value', 3);
+
+%% ========================================
+% ANIMATION STATE
+% ========================================
+
+animation.time = time;
+animation.rKm = rKm;
+animation.altitude = altitude;
+animation.vNorm = vNorm;
+animation.phase = phase;
+
+animation.index = 1;
+animation.playing = false;
+
+animation.speedValues = [1 5 20 100];
+
+animation.satellite = satellite;
+animation.trail = trail;
+
+animation.statusText = statusText;
+animation.timelineSlider = timelineSlider;
+animation.playButton = playButton;
+animation.speedMenu = speedMenu;
+
+animation.tabGroup = tabGroup;
+animation.tab7 = tab7;
+
+animation.lastTick = tic;
+
+setappdata(fig, 'AnimationState', animation);
+
+%% ========================================
+% CALLBACKS
+% ========================================
+
+set(playButton, 'Callback', ...
+    @(src,evt) animationPlayPause(src));
+
+set(restartButton, 'Callback', ...
+    @(src,evt) animationRestart(src));
+
+set(timelineSlider, 'Callback', ...
+    @(src,evt) animationSeek(src));
+
+%% ========================================
+% ANIMATION TIMER
+% ========================================
+
+animationTimer = timer( ...
+    'ExecutionMode', 'fixedSpacing', ...
+    'Period', 0.05, ...
+    'BusyMode', 'drop', ...
+    'TimerFcn', @(~,~) animationUpdate(fig));
+
+setappdata(fig, 'AnimationTimer', animationTimer);
+
+% Clean up timer when figure closes
+set(fig, 'CloseRequestFcn', ...
+    @(src,evt) animationClose(src));
+
+% Display initial state
+animationRender(fig);
+
+%% ========================================
 % SELECT FIRST TAB
 % ========================================
 
 tabGroup.SelectedTab = tab1;
 
 fprintf('\nMATLAB analysis complete.\n');
+
+%% ========================================
+% ANIMATION FUNCTIONS
+% ========================================
+
+function animationPlayPause(button)
+
+      fig = ancestor(button, 'figure');
+  
+      s = getappdata(fig, 'AnimationState');
+      t = getappdata(fig, 'AnimationTimer');
+  
+      if s.playing
+  
+          s.playing = false;
+  
+          set(s.playButton, 'String', 'Play');
+  
+          setappdata(fig, 'AnimationState', s);
+  
+          if strcmp(t.Running, 'on')
+              stop(t);
+          end
+  
+      else
+  
+          if s.index >= numel(s.time)
+              s.index = 1;
+          end
+  
+          s.playing = true;
+          s.lastTick = tic;
+  
+          set(s.playButton, 'String', 'Pause');
+  
+          setappdata(fig, 'AnimationState', s);
+  
+          animationRender(fig);
+  
+          if strcmp(t.Running, 'off')
+              start(t);
+          end
+  
+      end
+  
+  end
+  
+  %% ========================================
+  % RESTART ANIMATION
+  % ========================================
+  
+  function animationRestart(button)
+  
+      fig = ancestor(button, 'figure');
+  
+      s = getappdata(fig, 'AnimationState');
+      t = getappdata(fig, 'AnimationTimer');
+  
+      if strcmp(t.Running, 'on')
+          stop(t);
+      end
+  
+      s.index = 1;
+      s.playing = false;
+  
+      set(s.playButton, 'String', 'Play');
+  
+      setappdata(fig, 'AnimationState', s);
+  
+      animationRender(fig);
+  
+  end
+  
+  %% ========================================
+  % TIMELINE SLIDER
+  % ========================================
+  
+  function animationSeek(slider)
+  
+      fig = ancestor(slider, 'figure');
+  
+      s = getappdata(fig, 'AnimationState');
+  
+      s.index = max(1, ...
+          min(numel(s.time), round(slider.Value)));
+  
+      s.lastTick = tic;
+  
+      setappdata(fig, 'AnimationState', s);
+  
+      animationRender(fig);
+  
+  end
+  
+  %% ========================================
+  % UPDATE ANIMATION
+  % ========================================
+  
+  function animationUpdate(fig)
+  
+      if ~isgraphics(fig)
+          return;
+      end
+  
+      s = getappdata(fig, 'AnimationState');
+  
+      if isempty(s) || ~s.playing
+          return;
+      end
+  
+      % Pause progression when viewing another tab
+      if s.tabGroup.SelectedTab ~= s.tab7
+  
+          s.lastTick = tic;
+  
+          setappdata(fig, 'AnimationState', s);
+  
+          return;
+      end
+  
+      dtWall = toc(s.lastTick);
+      s.lastTick = tic;
+  
+      speed = s.speedValues(s.speedMenu.Value);
+  
+      % Playback speed:
+      % 1x = 1 minute simulated time per second
+      % 5x = 5 minutes simulated time per second
+      % etc.
+      targetTime = s.time(s.index) + dtWall * speed * 60;
+  
+      % Find next trajectory sample
+      nextIndex = find(s.time > targetTime, 1, 'first');
+  
+      if isempty(nextIndex)
+  
+          s.index = numel(s.time);
+          s.playing = false;
+  
+          set(s.playButton, 'String', 'Play');
+  
+          setappdata(fig, 'AnimationState', s);
+  
+          animationRender(fig);
+  
+          t = getappdata(fig, 'AnimationTimer');
+  
+          if strcmp(t.Running, 'on')
+              stop(t);
+          end
+  
+          return;
+      end
+  
+      s.index = max(s.index + 1, nextIndex - 1);
+      s.index = min(s.index, numel(s.time));
+  
+      setappdata(fig, 'AnimationState', s);
+  
+      animationRender(fig);
+  
+  end
+  
+  %% ========================================
+  % RENDER ANIMATION
+  % ========================================
+  
+  function animationRender(fig)
+  
+      if ~isgraphics(fig)
+          return;
+      end
+  
+      s = getappdata(fig, 'AnimationState');
+  
+      k = s.index;
+  
+      % Update spacecraft position
+      set(s.satellite, ...
+          'XData', s.rKm(k,1), ...
+          'YData', s.rKm(k,2), ...
+          'ZData', s.rKm(k,3));
+  
+      % Update travelled trajectory
+      step = max(1, floor(k/2500));
+  
+      indices = unique([1:step:k, k]);
+  
+      set(s.trail, ...
+          'XData', s.rKm(indices,1), ...
+          'YData', s.rKm(indices,2), ...
+          'ZData', s.rKm(indices,3));
+  
+      % Update timeline
+      set(s.timelineSlider, 'Value', k);
+  
+      % Determine orbital phase
+      labels = { ...
+          'Initial Orbit', ...
+          'Transfer Orbit', ...
+          'Final Orbit'};
+  
+      phaseIndex = s.phase(k) + 1;
+  
+      if phaseIndex >= 1 && phaseIndex <= numel(labels)
+          phaseLabel = labels{phaseIndex};
+      else
+          phaseLabel = 'Unknown';
+      end
+  
+      % Display orbital information
+      set(s.statusText, 'String', sprintf( ...
+          ['Time: %.1f min  |  ', ...
+           'Altitude: %.1f km  |  ', ...
+           'Velocity: %.3f km/s  |  ', ...
+           'Phase: %s'], ...
+          s.time(k)/60, ...
+          s.altitude(k)/1000, ...
+          s.vNorm(k)/1000, ...
+          phaseLabel));
+  
+      drawnow limitrate;
+  
+  end
+  
+  %% ========================================
+  % CLOSE ANIMATION
+  % ========================================
+  
+  function animationClose(fig)
+  
+      t = getappdata(fig, 'AnimationTimer');
+  
+      if ~isempty(t) && isvalid(t)
+  
+          if strcmp(t.Running, 'on')
+              stop(t);
+          end
+  
+          delete(t);
+  
+      end
+  
+      delete(fig);
+  
+  end

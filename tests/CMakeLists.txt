@@ -4,6 +4,7 @@ add_executable(unit_tests
     test_propagator.cpp
     test_keplerian.cpp
     test_HohmannTransfer.cpp
+    test_lambert.cpp
 
 )
 

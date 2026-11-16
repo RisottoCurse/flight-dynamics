@@ -57,6 +57,7 @@ int main() {
 
     // Dynamics Config
     OrbitalDynamics dynamics(mu);
+
     Propagator propagate(dynamics, dt);
 
     // Txt Output

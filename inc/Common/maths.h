@@ -14,8 +14,12 @@
 
 using Vector2 = Eigen::Vector2d;
 using Vector3 = Eigen::Vector3d;
+
 using Velocity = Eigen::Vector3d;
+using Cartesian = Eigen::Vector3d;
+
 using Vector6 = Eigen::Matrix<double, 6, 1>;
 using VectorX = Eigen::VectorXd;
+
 
 

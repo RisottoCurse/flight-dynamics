@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "Eigen/Core"
 #include "Common/Constants.h"
 #include "State/State.h"
 #include "Dynamics/OrbitalDynamics.h"

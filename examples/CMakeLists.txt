@@ -33,3 +33,12 @@ target_link_libraries(example_HohmannTransfer
     PRIVATE
         flight_dynamics
 )
+
+add_executable(example_Lambert
+    example_Lambert.cpp
+)
+
+target_link_libraries(example_Lambert
+    PRIVATE
+        flight_dynamics
+)

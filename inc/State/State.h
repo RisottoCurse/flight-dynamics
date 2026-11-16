@@ -5,16 +5,16 @@
 
 class StateVector {
 
-    Vector3 mPosition;
+    Cartesian mPosition;
     Velocity mVelocity;
 
 public: 
-    StateVector(const Vector3& position, const Velocity& velocity) : 
+    StateVector(const Cartesian& position, const Velocity& velocity) : 
     mPosition(position), mVelocity(velocity) 
     {};
 
     // getters
-    [[nodiscard]] auto getPosition() const -> const Vector3& { return mPosition; }
+    [[nodiscard]] auto getPosition() const -> const Cartesian& { return mPosition; }
     [[nodiscard]] auto getVelocity() const -> const Velocity& { return mVelocity; }
 
 };
